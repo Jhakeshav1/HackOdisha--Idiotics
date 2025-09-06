@@ -1,0 +1,91 @@
+version: "2.0"
+
+services:
+  campusx-backend:
+    image: ghcr.io/your-username/campusx-backend:latest
+    env:
+      - NODE_ENV=production
+      - PORT=4000
+      - MONGODB_URI=mongodb://mongo:27017/campusxchange
+      - JWT_SECRET=your-super-secret-jwt-key-for-production
+      - CORS_ORIGINS=*
+      - SOCKET_CORS_ORIGINS=*
+    expose:
+      - port: 4000
+        as: 80
+        to:
+          - global: true
+    resources:
+      cpu:
+        units: 1.0
+      memory:
+        size: 1Gi
+      storage:
+        - size: 10Gi
+          name: data
+    params:
+      storage:
+        data:
+          mount: /app/uploads
+    command: ["npm", "start"]
+
+  mongo:
+    image: mongo:6.0
+    env:
+      - MONGO_INITDB_DATABASE=campusxchange
+    resources:
+      cpu:
+        units: 0.5
+      memory:
+        size: 512Mi
+      storage:
+        - size: 5Gi
+          name: mongodb
+    params:
+      storage:
+        mongodb:
+          mount: /data/db
+
+profiles:
+  compute:
+    campusx-backend:
+      resources:
+        cpu:
+          units: 1.0
+        memory:
+          size: 1Gi
+        storage:
+          - size: 10Gi
+            name: data
+    mongo:
+      resources:
+        cpu:
+          units: 0.5
+        memory:
+          size: 512Mi
+        storage:
+          - size: 5Gi
+            name: mongodb
+  placement:
+    akash:
+      attributes:
+        host: akash
+      signedBy:
+        anyOf:
+          - "akash1vqcqruf8kfq6k8k8k8k8k8k8k8k8k8k8k8k8k"
+      pricing:
+        campusx-backend:
+          denom: uakt
+          amount: 1000
+        mongo:
+          denom: uakt
+          amount: 500
+
+deployment:
+  campusx-backend:
+    campusx-backend:
+      profile: campusx-backend
+      count: 1
+    mongo:
+      profile: mongo
+      count: 1
