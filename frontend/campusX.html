@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CampusXchange – College‑Only Marketplace</title>
+  <meta name="description" content="A decentralized, college‑only marketplace for buying/selling used gadgets, books, notes, and essentials with verified student access, chat, negotiation bot, filters, ratings, and recommendations." />
+  <style>
+    :root {
+      --bg: #0b1020;           
+      --panel: #121833;
+      --muted: #9aa4bf;
+      --text: #e6ebff;
+      --brand: #7c9bff;        
+      --brand-2: #7affe0;     
+      --success: #34d399;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --chip: #1a2144;
+      --shadow: 0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.04);
+      --radius-xl: 20px;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 8px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color: var(--text); background: radial-gradient(1000px 800px at 80% -10%, rgba(124,155,255,.25), transparent 60%),
+                          radial-gradient(1000px 800px at -20% -30%, rgba(122,255,224,.18), transparent 60%), var(--bg);
+    }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    header {
+      position: sticky; top: 0; z-index: 40; backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(11,16,32,.9), rgba(11,16,32,.75));
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .nav { display:flex; align-items:center; gap:16px; padding: 14px 24px; }
+    .logo { display:flex; align-items:center; gap:10px; font-weight: 800; letter-spacing:.3px; }
+    .logo-badge { width: 34px; height: 34px; border-radius: 10px; display:grid; place-items:center; font-weight:900;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2)); color:#081224; box-shadow: var(--shadow); }
+
+    .navlinks { display:flex; gap:14px; margin-left: 24px; }
+    .navlinks a { padding: 8px 12px; border-radius: 10px; color: var(--muted); }
+    .navlinks a.active, .navlinks a:hover { color: var(--text); background: rgba(124,155,255,.15); }
+
+    .nav-actions { margin-left:auto; display:flex; gap:10px; align-items:center; }
+    .btn { background: linear-gradient(180deg, #1b2350, #12183a); color: var(--text); border:1px solid rgba(255,255,255,.06);
+           padding:10px 14px; border-radius: 12px; cursor: pointer; box-shadow: var(--shadow); font-weight: 600; }
+    .btn:hover { filter: brightness(1.05); }
+    .btn.ghost { background: #0f1533; color: var(--muted); }
+    .btn.brand { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color:#081224; }
+
+    /* Hero */
+    .hero { display:grid; grid-template-columns: 1.1fr .9fr; gap:20px; align-items:center; padding: 28px 24px 10px; }
+    .hero h1 { font-size: clamp(24px, 4vw, 40px); margin:0 0 8px; }
+    .hero p { color: var(--muted); margin:0 0 16px; }
+    .hero-card { background: linear-gradient(180deg, #0f1533, #0b112b); border:1px solid rgba(255,255,255,.08);
+                 padding: 20px; border-radius: var(--radius-xl); box-shadow: var(--shadow); }
+
+    .chips { display:flex; gap:10px; flex-wrap:wrap; }
+    .chip { background: var(--chip); border:1px solid rgba(255,255,255,.06); color: var(--muted); padding:8px 10px; border-radius: 999px; font-size: 12px; }
+
+    .searchbar { display:flex; gap:10px; margin-top:16px; }
+    .searchbar input { flex:1; padding:12px 14px; border-radius: 12px; border:1px solid rgba(255,255,255,.08); background:#0b122e; color: var(--text); }
+    .searchbar .btn { white-space:nowrap; }
+
+    /* Layout */
+    .layout { display:grid; grid-template-columns: 260px 1fr; gap:18px; padding: 18px 24px 90px; }
+
+    /* Filters */
+    .panel { background: var(--panel); border:1px solid rgba(255,255,255,.06); border-radius: var(--radius-xl); box-shadow: var(--shadow); }
+    .panel h3 { margin:0; padding:16px 16px 0; font-size: 16px; }
+    .filter-group { padding: 12px 16px; border-top:1px solid rgba(255,255,255,.06); }
+    .stack { display:grid; gap:10px; }
+    .row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .muted { color: var(--muted); font-size: 13px; }
+    label { font-size: 14px; }
+    input[type="checkbox"] { width:16px; height:16px; }
+    select, input[type="number"], input[type="range"] { width:100%; padding:10px; background:#0b122e; color:var(--text); border:1px solid rgba(255,255,255,.08); border-radius: 10px; }
+
+    /* Products grid */
+    .toolbar { display:flex; align-items:center; justify-content: space-between; padding: 10px 2px 6px; }
+    .grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; }
+    .card { background: linear-gradient(180deg, #0f1536, #0c132f); border:1px solid rgba(255,255,255,.06); border-radius: var(--radius-lg); overflow:hidden; box-shadow: var(--shadow); position:relative; }
+    .thumb { background: #0b122e; aspect-ratio: 4 / 3; display:grid; place-items:center; color: var(--muted); font-size: 13px; border-bottom: 1px solid rgba(255,255,255,.06); }
+    .content { padding: 12px; display:grid; gap:8px; }
+    .price { font-weight:800; font-size: 18px; }
+    .title { font-weight:700; }
+    .meta { display:flex; justify-content: space-between; align-items:center; color: var(--muted); font-size:12px; }
+    .actions { display:flex; gap:8px; }
+
+    /* Ratings */
+    .stars { display:inline-flex; gap:2px; cursor:pointer; }
+    .star { width:18px; height:18px; mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>') center / contain no-repeat; -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>') center / contain no-repeat; background: #2a335f; }
+    .star.filled { background: linear-gradient(135deg, var(--brand), var(--brand-2)); }
+
+    /* Drawers/Modals */
+    dialog { border:none; background: #0b112b; color: var(--text); border-radius: var(--radius-xl); width:min(680px, 94vw); box-shadow: var(--shadow); }
+    dialog::backdrop { backdrop-filter: blur(8px); background: rgba(3,6,20,.55); }
+    .dialog-header { display:flex; justify-content: space-between; align-items:center; padding: 12px 16px; border-bottom:1px solid rgba(255,255,255,.06); }
+    .dialog-body { padding: 16px; display:grid; gap:14px; }
+    .close-x { cursor:pointer; font-weight:700; color: var(--muted); }
+
+    /* Chat */
+    .chat { display:grid; grid-template-rows: 1fr auto; height: 320px; border:1px solid rgba(255,255,255,.06); border-radius: var(--radius-lg); overflow:hidden; }
+    .chat-log { padding: 12px; overflow:auto; display:grid; gap:8px; background:#0a1028; }
+    .bubble { max-width: 80%; padding:10px 12px; border-radius: 14px; }
+    .bubble.me { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color:#081224; justify-self: end; }
+    .bubble.them { background:#141b3d; color: var(--text); justify-self: start; }
+    .chat-input { display:flex; gap:8px; padding: 10px; background:#0b122e; }
+    .chat-input input { flex:1; padding:10px; border-radius: 10px; border:1px solid rgba(255,255,255,.08); background:#07102a; color: var(--text); }
+
+    /* Footer */
+    footer { padding: 28px 24px; color: var(--muted); border-top:1px solid rgba(255,255,255,.06); background: #0a0f22; }
+
+    /* Responsive */
+    @media (max-width: 980px) {
+      .hero { grid-template-columns: 1fr; }
+      .layout { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+      .navlinks { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav container">
+      <div class="logo">
+        <div class="logo-badge">CX</div>
+        <div>CampusXchange</div>
+      </div>
+      <nav class="navlinks">
+        <a class="active" href="#">Marketplace</a>
+        <a href="#" onclick="openSell()">Sell</a>
+        <a href="#" onclick="openMessages()">Messages</a>
+        <a href="#" onclick="openHowItWorks()">How it works</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="btn ghost" onclick="openVerify()" id="verifyBtn">Verify Student</button>
+        <button class="btn brand" onclick="openSell()">+ List Item</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-card">
+        <h1>Buy & sell within your campus — private, verified, and fast.</h1>
+        <p>Only verified students can join. Trade gadgets, textbooks, handwritten notes, and daily essentials with escrow‑ready checkout, in‑app chat, and a negotiation bot.</p>
+        <div class="chips">
+          <span class="chip">Verified .edu / college email</span>
+          <span class="chip">On‑campus only listings</span>
+          <span class="chip">Negotiation bot</span>
+          <span class="chip">Ratings & reviews</span>
+          <span class="chip">Smart recommendations</span>
+        </div>
+        <div class="searchbar">
+          <input id="q" placeholder="Search for 'iPad', 'CSE notes', 'scientific calculator'…" oninput="renderProducts()" />
+          <button class="btn" onclick="renderProducts()">Search</button>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="row"><div class="muted">Your trust score</div> <div id="trustScore" class="price">—</div></div>
+        <div class="muted">Complete your student verification and first trade to unlock higher limits and faster payouts via campus escrow.</div>
+        <div style="height:12px"></div>
+        <div class="row">
+          <button class="btn brand" onclick="openVerify()">Verify now</button>
+          <button class="btn ghost" onclick="openHowItWorks()">Learn more</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Layout -->
+    <section class="layout">
+      <!-- Filters -->
+      <aside class="panel">
+        <h3>Filters</h3>
+        <div class="filter-group">
+          <div class="stack">
+            <label>Category</label>
+            <select id="fCategory" onchange="renderProducts()">
+              <option value="all">All</option>
+              <option>Gadgets</option>
+              <option>Books</option>
+              <option>Notes</option>
+              <option>Essentials</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="stack">
+            <label>Max price (₹)</label>
+            <input type="range" id="fPrice" min="0" max="30000" step="500" value="30000" oninput="fPriceVal.textContent=this.value; renderProducts()"> 
+            <div class="row"><span class="muted">0</span><strong id="fPriceVal">30000</strong></div>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="stack">
+            <label>Condition</label>
+            <select id="fCondition" onchange="renderProducts()">
+              <option value="all">Any</option>
+              <option>Like New</option>
+              <option>Good</option>
+              <option>Fair</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="stack">
+            <label>Seller rating (min)</label>
+            <select id="fRating" onchange="renderProducts()">
+              <option value="0">Any</option>
+              <option value="3">3★</option>
+              <option value="4">4★</option>
+              <option value="4.5">4.5★</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="row">
+            <label class="muted">Show only my campus</label>
+            <input type="checkbox" id="fCampus" checked onchange="renderProducts()" />
+          </div>
+        </div>
+        <div class="filter-group">
+          <label>Sort by</label>
+          <select id="fSort" onchange="renderProducts()">
+            <option value="reco">Recommended</option>
+            <option value="priceAsc">Price ↑</option>
+            <option value="priceDesc">Price ↓</option>
+            <option value="new">Newest</option>
+          </select>
+        </div>
+      </aside>
+
+      <!-- Products -->
+      <section>
+        <div class="toolbar">
+          <div class="muted"><span id="count">0</span> results</div>
+          <div class="row" style="gap:8px">
+            <button class="btn" onclick="openSell()">+ List item</button>
+            <button class="btn ghost" onclick="openMessages()">Open messages</button>
+          </div>
+        </div>
+        <div class="grid" id="grid"></div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="container">
+    <div>© <span id="year"></span> CampusXchange — College‑only marketplace • <a href="#" onclick="openHowItWorks()">Privacy</a> • <a href="#" onclick="openHowItWorks()">Terms</a></div>
+  </footer>
+
+  <!-- Product Detail / Chat Dialog -->
+  <dialog id="productDialog">
+    <div class="dialog-header">
+      <strong id="pTitle">Item</strong>
+      <span class="close-x" onclick="closeDialog('productDialog')">✕</span>
+    </div>
+    <div class="dialog-body" id="pBody">
+      <!-- injected dynamically -->
+    </div>
+  </dialog>
+
+  <!-- Sell Dialog -->
+  <dialog id="sellDialog">
+    <div class="dialog-header">
+      <strong>List an item</strong>
+      <span class="close-x" onclick="closeDialog('sellDialog')">✕</span>
+    </div>
+    <div class="dialog-body">
+      <div class="stack">
+        <label>Title</label>
+        <input id="sTitle" placeholder="Eg. Casio fx-991ES Plus" />
+        <label>Price (₹)</label>
+        <input id="sPrice" type="number" min="0" step="50" />
+        <label>Category</label>
+        <select id="sCat"><option>Gadgets</option><option>Books</option><option>Notes</option><option>Essentials</option></select>
+        <label>Condition</label>
+        <select id="sCond"><option>Like New</option><option>Good</option><option>Fair</option></select>
+        <label>Description</label>
+        <textarea id="sDesc" rows="3" placeholder="Add helpful details…" style="width:100%; padding:10px; border-radius:10px; background:#0b122e; color:var(--text); border:1px solid rgba(255,255,255,.08)"></textarea>
+        <label>Photo</label>
+        <input id="sPhoto" type="file" accept="image/*" onchange="previewPhoto(event)" />
+        <img id="sPreview" style="display:none; max-width:100%; border-radius:12px; border:1px solid rgba(255,255,255,.06)"/>
+        <button class="btn brand" onclick="createListing()">Publish</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Verify Dialog -->
+  <dialog id="verifyDialog">
+    <div class="dialog-header">
+      <strong>Verify student</strong>
+      <span class="close-x" onclick="closeDialog('verifyDialog')">✕</span>
+    </div>
+    <div class="dialog-body">
+      <div class="stack">
+        <div class="muted">Enter your college email to unlock the marketplace. Example: name@college.edu / name@nitdgp.ac.in</div>
+        <label>Email</label>
+        <input id="vEmail" placeholder="you@college.edu" />
+        <button class="btn brand" onclick="verifyStudent()">Send verification</button>
+        <div class="muted">Demo only: we validate format and store a signed‑in session in localStorage. Replace with your auth provider (eg. Firebase) and domain whitelist.</div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- How It Works Dialog -->
+  <dialog id="howDialog">
+    <div class="dialog-header">
+      <strong>How CampusXchange works</strong>
+      <span class="close-x" onclick="closeDialog('howDialog')">✕</span>
+    </div>
+    <div class="dialog-body">
+      <ul>
+        <li>Only verified students can list or buy. Use college email domains; add SSO later.</li>
+        <li>In‑app messages keep phone numbers private until you choose to share.</li>
+        <li>Negotiation bot proposes fair counter‑offers using list/market prices and constraints.</li>
+        <li>Escrow‑ready checkout: integrate on‑chain (testnet) or UPI hold with smart contract/escrow service.</li>
+        <li>Ratings build trust; repeated trades increase trust score.</li>
+      </ul>
+      <div class="muted">This demo is front‑end only. Replace marked hooks with real services (Auth, DB, Storage, Payments, WebSocket).</div>
+    </div>
+  </dialog>
+
+  <script src="/src/api.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script>
+    // --------------------------- State Management ---------------------------
+    let currentUser = null;
+    let listings = [];
+    let isLoading = false;
+    let socket = null;
+    let currentChatId = null;
+
+    // Initialize Socket.io connection
+    function initSocket() {
+      // Auto-detect Socket.io URL for production/development
+      const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+      const socketURL = isProduction ? window.location.origin : 'http://localhost:4000';
+      
+      socket = io(socketURL, {
+        auth: {
+          token: localStorage.getItem('campusx_token')
+        }
+      });
+
+      socket.on('connect', () => {
+        console.log('Connected to server:', socket.id);
+      });
+
+      socket.on('disconnect', () => {
+        console.log('Disconnected from server');
+      });
+
+      // Listen for chat messages
+      socket.on('chatMessage', (message) => {
+        console.log('Received message:', message);
+        displayMessage(message);
+      });
+
+      // Listen for negotiation messages
+      socket.on('negotiationMessage', (message) => {
+        console.log('Received negotiation:', message);
+        displayMessage(message);
+      });
+
+      // Listen for typing indicators
+      socket.on('userTyping', (data) => {
+        showTypingIndicator(data.userName);
+      });
+
+      socket.on('userStopTyping', (data) => {
+        hideTypingIndicator(data.userId);
+      });
+
+      socket.on('error', (error) => {
+        console.error('Socket error:', error);
+        showError('Connection error: ' + error.message);
+      });
+    }
+
+    // Initialize app
+    async function initApp() {
+      try {
+        // Initialize Socket.io connection
+        initSocket();
+        
+        // Check if user is already logged in
+        const token = localStorage.getItem('campusx_token');
+        if (token) {
+          api.setToken(token);
+          currentUser = await api.getCurrentUser();
+          updateAuthUI();
+        }
+        
+        // Load initial listings
+        await renderProducts();
+      } catch (error) {
+        console.error('App initialization error:', error);
+        // If token is invalid, clear it
+        if (error.message.includes('Invalid') || error.message.includes('Unauthorized')) {
+          api.setToken(null);
+          currentUser = null;
+        }
+      }
+    }
+
+    // Load listings from API
+    async function loadListings(filters = {}) {
+      try {
+        isLoading = true;
+        // Try to fetch from backend
+        const data = await api.getListings(filters);
+        // If backend returns empty, use demo listings
+        if (!data || data.length === 0) throw new Error('No backend data');
+        listings = data;
+        return data;
+      } catch (error) {
+        // Use demo listings for front-end only mode
+        let filtered = listings;
+        if (filters.q) {
+          filtered = filtered.filter(x => x.title.toLowerCase().includes(filters.q.toLowerCase()));
+        }
+        if (filters.category && filters.category !== 'all') {
+          filtered = filtered.filter(x => x.category === filters.category);
+        }
+        if (filters.maxPrice) {
+          filtered = filtered.filter(x => x.price <= filters.maxPrice);
+        }
+        if (filters.condition && filters.condition !== 'all') {
+          filtered = filtered.filter(x => x.condition.replace('_', ' ').toLowerCase() === filters.condition.toLowerCase());
+        }
+        if (filters.sort === 'priceAsc') {
+          filtered = filtered.sort((a, b) => a.price - b.price);
+        }
+        if (filters.sort === 'priceDesc') {
+          filtered = filtered.sort((a, b) => b.price - a.price);
+        }
+        if (filters.sort === 'new') {
+          filtered = filtered.sort((a, b) => b.createdAt - a.createdAt);
+        }
+        return filtered;
+      } finally {
+        isLoading = false;
+      }
+    }
+
+    // --------------------------- Utilities ---------------------------
+    const $ = (s, el=document) => el.querySelector(s);
+    const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+
+    function openDialog(id) { const d = document.getElementById(id); d.showModal(); }
+    function closeDialog(id) { const d = document.getElementById(id); d.close(); }
+
+    function openSell(){ openDialog('sellDialog'); }
+    function openVerify(){ openDialog('verifyDialog'); }
+    function openMessages(){ alert('Open any product and use the in‑app chat. (WebSocket placeholder)'); }
+    function openHowItWorks(){ openDialog('howDialog'); }
+
+    // --------------------------- Auth ---------------------------
+    async function verifyStudent(){
+      const email = $('#vEmail').value.trim();
+      const password = prompt('Enter password for registration:') || 'demo123';
+      const displayName = email.split('@')[0];
+      
+      const ok = /@([a-z0-9-]+\.)?(edu|ac|ac\.in|edu\.in|ii?it|nit|iisc)\.[a-z.]+$/i.test(email) || /@([a-z0-9-]+\.)?iitkgp\.ac\.in$/i.test(email);
+      if(!ok){ 
+        showError('Use your college/edu email. Example: name@college.edu or name@iitkgp.ac.in'); 
+        return; 
+      }
+
+      try {
+        // Try to register first, if user exists, try login
+        try {
+          const result = await api.register(email, password, displayName);
+          currentUser = result.user;
+          api.setToken(result.token);
+          showSuccess('Account created successfully!');
+        } catch (registerError) {
+          if (registerError.message.includes('already exists')) {
+            // User exists, try to login
+            const result = await api.login(email, password);
+            currentUser = result.user;
+            api.setToken(result.token);
+            showSuccess('Logged in successfully!');
+          } else {
+            throw registerError;
+          }
+        }
+        
+        updateAuthUI();
+        closeDialog('verifyDialog');
+        await renderProducts(); // Refresh listings
+      } catch (error) {
+        console.error('Auth error:', error);
+        showError(error.message || 'Authentication failed. Please try again.');
+      }
+    }
+
+    function updateAuthUI(){
+      const btn = document.getElementById('verifyBtn');
+      if(currentUser){
+        btn.textContent = currentUser.email;
+        btn.classList.add('ghost');
+        $('#trustScore').textContent = (currentUser.rating?.avg || 4.2).toFixed(1) + ' ★';
+      } else { 
+        $('#trustScore').textContent = '—';
+        btn.textContent = 'Verify Student';
+        btn.classList.remove('ghost');
+      }
+    }
+
+    // --------------------------- Listing ---------------------------
+    function previewPhoto(e){
+      const file = e.target.files?.[0]; if(!file) return;
+      const url = URL.createObjectURL(file);
+      const img = document.getElementById('sPreview');
+      img.src = url; img.style.display = 'block';
+    }
+
+    async function createListing(){
+      if(!currentUser){ 
+        showError('Please verify your student account first.'); 
+        openVerify();
+        return; 
+      }
+      
+      const title = $('#sTitle').value.trim();
+      const price = +$('#sPrice').value;
+      const category = $('#sCat').value; 
+      const condition = $('#sCond').value; 
+      const desc = $('#sDesc').value.trim();
+      
+      if(!title || !price){ 
+        showError('Title and price are required.'); 
+        return; 
+      }
+
+      try {
+        const formData = {
+          title,
+          price,
+          category,
+          condition: condition.toLowerCase().replace(' ', '_'),
+          description: desc,
+          campusId: 'demo_campus_id', // You'll need to implement campus selection
+          images: Array.from($('#sPhoto').files)
+        };
+
+        await api.createListing(formData);
+        showSuccess('Listing created successfully!');
+        closeDialog('sellDialog');
+        
+        // Clear form
+        $('#sTitle').value = '';
+        $('#sPrice').value = '';
+        $('#sDesc').value = '';
+        $('#sPhoto').value = '';
+        $('#sPreview').style.display = 'none';
+        
+        await renderProducts(); // Refresh listings
+      } catch (error) {
+        console.error('Error creating listing:', error);
+        showError(error.message || 'Failed to create listing. Please try again.');
+      }
+    }
+
+    // --------------------------- Product Card / Detail ---------------------------
+    function productCard(p){
+      const seller = p.sellerId || {};
+      const condition = p.condition ? p.condition.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Used';
+      const imageUrl = p.images && p.images.length > 0 ? p.images[0].url : null;
+      
+      return `<div class="card">
+        <div class="thumb" style="${imageUrl ? `background-image: url('${imageUrl}'); background-size: cover; background-position: center;` : ''}">
+          ${!imageUrl ? 'Image placeholder' : ''}
+        </div>
+        <div class="content">
+          <div class="title">${escapeHTML(p.title)}</div>
+          <div class="row"><div class="price">₹${p.price.toLocaleString('en-IN')}</div><div class="muted">${condition}</div></div>
+          <div class="meta"><span>${p.category} • ${p.campusId || 'Campus'}</span><span>${seller.displayName || 'Seller'} • ${(seller.rating?.avg || 4.5).toFixed(1)}★</span></div>
+          <div class="actions">
+            <button class="btn" onclick="openProduct('${p._id}')">View</button>
+            <button class="btn ghost" onclick="openChat('${p._id}')">Chat</button>
+            <button class="btn brand" onclick="negotiateBot('${p._id}')">Negotiate (AI Bot)</button>
+          </div>
+        </div>
+      </div>`
+    }
+
+    async function renderProducts(){
+      try {
+        const filters = {
+          q: $('#q').value.trim(),
+          category: $('#fCategory').value !== 'all' ? $('#fCategory').value : undefined,
+          maxPrice: $('#fPrice').value !== '30000' ? $('#fPrice').value : undefined,
+          condition: $('#fCondition').value !== 'all' ? $('#fCondition').value : undefined,
+          sort: $('#fSort').value === 'reco' ? 'newest' : $('#fSort').value
+        };
+
+        const data = await loadListings(filters);
+        const grid = document.getElementById('grid');
+        
+        if (isLoading) {
+          grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted);">Loading...</div>';
+          return;
+        }
+
+        if (data.length === 0) {
+          grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted);">No listings found. Try adjusting your filters.</div>';
+          $('#count').textContent = '0';
+          return;
+        }
+
+        grid.innerHTML = data.map(productCard).join('');
+        $('#count').textContent = data.length;
+      } catch (error) {
+        console.error('Error rendering products:', error);
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--danger);">Error loading products. Please try again.</div>';
+      }
+    }
+
+    async function openProduct(id){
+      try {
+        const p = await api.getListing(id);
+        const s = p.sellerId || {};
+        $('#pTitle').textContent = p.title;
+        
+        const condition = p.condition ? p.condition.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Used';
+        const imageUrl = p.images && p.images.length > 0 ? p.images[0].url : null;
+        
+        const body = `
+          <div class="row" style="align-items:start; gap:16px">
+            <div style="flex:1">
+              <div class="thumb" style="border-radius:12px; ${imageUrl ? `background-image: url('${imageUrl}'); background-size: cover; background-position: center;` : ''}">
+                ${!imageUrl ? 'Image placeholder' : ''}
+              </div>
+              <div class="muted" style="margin-top:8px">${condition} • Listed ${timeAgo(p.createdAt)}</div>
+              <div style="margin-top:8px">${escapeHTML(p.description || '')}</div>
+              <div style="margin-top:8px">
+                <strong>Similar items</strong>
+                <div id="reco" class="chips"></div>
+              </div>
+            </div>
+            <div style="width: 320px" class="stack">
+              <div class="panel" style="padding:12px">
+                <div class="row"><div class="price">₹${p.price.toLocaleString('en-IN')}</div><div>${p.category}</div></div>
+                <div class="row"><div>Seller</div><div><strong>${s.displayName || 'Seller'}</strong> • ${(s.rating?.avg || 4.5).toFixed(1)}★</div></div>
+                <div class="row"><button class="btn brand" onclick="openChat('${p._id}')">Message seller</button><button class="btn" onclick="negotiate('${p._id}')">Negotiate</button></div>
+                <button class="btn ghost" onclick="alert('Escrow checkout (placeholder)')">Pay via Escrow</button>
+                <div class="muted">Escrow & payment are placeholders. Integrate your blockchain/UPI hold.</div>
+              </div>
+              <div class="panel" style="padding:12px">
+                <div><strong>Rate this seller</strong></div>
+                <div class="stars" data-seller="${s._id || s.id}" onclick="rateSeller(event)">${starsHTML(s.rating?.avg || 4.5)}</div>
+                <div class="muted">Your rating updates their trust score.</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <strong>In‑app chat</strong>
+            <div class="chat">
+              <div class="chat-log" id="chat-${p._id}"></div>
+            <div class="chat-input">
+              <input id="msg-${p._id}" placeholder="Write a message or offer…" 
+                     onkeydown="if(event.key==='Enter') send('${p._id}')" 
+                     oninput="handleTyping('${p._id}')" />
+              <button class="btn" onclick="send('${p._id}')">Send</button>
+              <button class="btn ghost" onclick="negotiate('${p._id}')">🤝 Bot</button>
+            </div>
+            </div>
+          </div>`;
+        $('#pBody').innerHTML = body;
+        openDialog('productDialog');
+        renderChat(id);
+        renderReco(id);
+      } catch (error) {
+        console.error('Error opening product:', error);
+        showError('Failed to load product details.');
+      }
+    }
+
+    function openChat(id){ openProduct(id); setTimeout(()=>{ $(`#msg-${id}`).focus(); }, 50); }
+
+    function renderReco(id){
+      const p = listings.find(x=>x._id===id);
+      if (!p) return;
+      
+      const items = listings.filter(x=> x.category===p.category && x._id!==id).slice(0,3);
+      const holder = $('#reco');
+      holder.innerHTML = items.map(x=>`<a class="chip" href="#" onclick="openProduct('${x._id}')">${x.title.slice(0,24)}…</a>`).join('') || '<span class="muted">No similar items yet.</span>'
+    }
+
+    // Utility functions
+    function escapeHTML(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, function(match) {
+        switch (match) {
+          case '&': return '&amp;';
+          case '<': return '&lt;';
+          case '>': return '&gt;';
+          case '"': return '&quot;';
+          case "'": return '&#39;';
+          default: return match;
+        }
+      });
+    }
+
+    function timeAgo(date) {
+      if (!date) return 'Unknown';
+      const now = new Date();
+      const past = new Date(date);
+      const diffInSeconds = Math.floor((now - past) / 1000);
+      
+      if (diffInSeconds < 60) return 'Just now';
+      if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+      if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+      if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+      return past.toLocaleDateString();
+    }
+
+    function showError(message) {
+      // Simple error display - you can enhance this with a proper notification system
+      alert('Error: ' + message);
+    }
+
+    function showSuccess(message) {
+      // Simple success display - you can enhance this with a proper notification system
+      alert('Success: ' + message);
+    }
+
+    function send(id){
+      const input = document.getElementById(`msg-${id}`);
+      const text = input.value.trim(); 
+      if(!text) return;
+      
+      if (!socket) {
+        showError('Not connected to chat server. Please refresh the page.');
+        return;
+      }
+
+      // Set current chat ID
+      currentChatId = id;
+      
+      // Join the chat room if not already joined
+      socket.emit('joinChat', id);
+      
+      // Send message via Socket.io
+      socket.emit('chatMessage', {
+        text: text,
+        chatId: id
+      });
+      
+      // Clear input
+      input.value = '';
+    }
+
+    function sendNegotiation(id, offerAmount) {
+      if (!socket) {
+        showError('Not connected to chat server. Please refresh the page.');
+        return;
+      }
+
+      currentChatId = id;
+      socket.emit('joinChat', id);
+      
+      socket.emit('negotiationMessage', {
+        text: `I'd like to offer ₹${offerAmount} for this item.`,
+        chatId: id,
+        offer: {
+          amount: offerAmount,
+          currency: 'INR'
+        }
+      });
+    }
+
+    function displayMessage(message) {
+      const chatId = message.chatId;
+      const chatLog = document.getElementById(`chat-${chatId}`);
+      if (!chatLog) return;
+
+      const messageDiv = document.createElement('div');
+      const isMe = message.senderId === currentUser?._id || message.senderId === 'demo_user';
+      messageDiv.className = `bubble ${isMe ? 'me' : 'them'}`;
+      
+      let messageContent = escapeHTML(message.text);
+      if (message.type === 'negotiation' && message.offer) {
+        messageContent += `<div class="muted" style="font-size:11px; margin-top:4px;">💰 Offer: ₹${message.offer.amount}</div>`;
+      }
+      
+      messageDiv.innerHTML = `${messageContent}<div class="muted" style="font-size:10px">${new Date(message.timestamp).toLocaleTimeString()}</div>`;
+      chatLog.appendChild(messageDiv);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function renderChat(id){
+      const log = document.getElementById(`chat-${id}`); 
+      if(!log) return;
+      
+      // Join the chat room
+      if (socket) {
+        socket.emit('joinChat', id);
+        currentChatId = id;
+      }
+      
+      // Show welcome message
+      log.innerHTML = '<div class="muted" style="text-align: center; padding: 20px;">Start a conversation about this item...</div>';
+    }
+
+    // Typing indicators
+    let typingTimeout;
+    function handleTyping(id) {
+      if (!socket) return;
+      
+      socket.emit('typing', { chatId: id });
+      
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => {
+        socket.emit('stopTyping', { chatId: id });
+      }, 1000);
+    }
+
+    function showTypingIndicator(userName) {
+      const chatLog = document.getElementById(`chat-${currentChatId}`);
+      if (!chatLog) return;
+      
+      let typingDiv = document.getElementById('typing-indicator');
+      if (!typingDiv) {
+        typingDiv = document.createElement('div');
+        typingDiv.id = 'typing-indicator';
+        typingDiv.className = 'bubble them';
+        typingDiv.style.fontStyle = 'italic';
+        typingDiv.style.opacity = '0.7';
+        chatLog.appendChild(typingDiv);
+      }
+      typingDiv.innerHTML = `${userName} is typing...`;
+    }
+
+    function hideTypingIndicator(userId) {
+      const typingDiv = document.getElementById('typing-indicator');
+      if (typingDiv) {
+        typingDiv.remove();
+      }
+    }
+
+    // --------------------------- Negotiation Bot (Front‑end demo) ---------------------------
+    function negotiate(id){
+      const p = listings.find(x=>x._id===id);
+      if (!p) return;
+      
+      const ask = p.price;
+      const minAccept = Math.floor(ask * 0.88); // seller's bottom line (demo)
+      const anchor = Math.floor(ask * 0.95);
+      
+      // Show negotiation dialog
+      const offerAmount = prompt(`Current price: ₹${ask}\nSuggested offer: ₹${anchor}\nEnter your offer amount:`);
+      if (offerAmount && !isNaN(offerAmount)) {
+        sendNegotiation(id, parseInt(offerAmount));
+      }
+    }
+
+    async function negotiateBot(id) {
+      const p = listings.find(x => x._id === id);
+      if (!p) return;
+
+      const buyerOffer = prompt(`Current price: ₹${p.price}\nEnter your offer amount:`);
+      if (!buyerOffer || isNaN(buyerOffer)) return;
+
+      // Prepare prompt for Ollama
+      const prompt = `
+You are an AI negotiator bot. The product was originally bought for ₹${p.price * 1.15}, 
+used for ${p.condition === 'like_new' ? 1 : p.condition === 'good' ? 2 : 3} years, and the seller is now asking for ₹${p.price}. 
+The buyer offered ₹${buyerOffer}.
+
+Your job:
+1. If the buyer’s offer is greater than or equal to the seller’s secret minimum price of ₹${Math.floor(p.price * 0.88)}, 
+   accept the deal with the buyer's offer.
+2. If it’s below the minimum, give a counter-offer slightly above their offer, 
+   but never reveal the seller's minimum price.
+3. Keep responses short and conversational (like a live negotiation chat).
+`;
+
+      // Call Ollama API
+      try {
+        const res = await fetch('http://localhost:11434/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'llama3',
+            prompt: prompt,
+            stream: false
+          })
+        });
+        const data = await res.json();
+        const reply = data.response || '🤝 That’s a bit low. Can you increase your offer?';
+
+        // Show bot reply in chat
+        displayMessage({
+          text: reply,
+          chatId: id,
+          type: 'negotiation',
+          offer: { amount: buyerOffer, currency: 'INR' },
+          senderId: 'ai_bot',
+          timestamp: Date.now()
+        });
+      } catch (err) {
+        showError('AI negotiation bot failed.');
+      }
+    }
+
+    function extractNumber(t){ const m = t.replace(/[, ]/g,'').match(/(₹)?(\d{2,6})/); return m? +m[2] : null; }
+    function stepToward(a,b,ratio){ return Math.round(a + (b-a)*ratio); }
+
+    // --------------------------- Ratings ---------------------------
+    function sellerRatingStars(r){ return `${r.toFixed(1)}★`; }
+    function starsHTML(avg){
+      const full = Math.round(avg);
+      return Array.from({length:5}).map((_,i)=>`<div class="star ${i<full?'filled':''}"></div>`).join('');
+    }
+
+    function rateSeller(e){
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left; 
+      const index = Math.min(4, Math.max(0, Math.floor(x / (rect.width/5))));
+      const sellerId = e.currentTarget.getAttribute('data-seller');
+      
+      // For now, just show a success message
+      // In a real implementation, you'd send this to the rating API
+      showSuccess(`Thanks! You rated ${index+1}★`);
+      
+      // Update the display immediately
+      const stars = e.currentTarget.querySelectorAll('.star');
+      stars.forEach((star, i) => {
+        star.classList.toggle('filled', i <= index);
+      });
+    }
+
+    // Demo products (for front-end only)
+    listings = [
+      {
+        _id: 'demo1',
+        title: 'Casio fx-991ES Plus Calculator',
+        price: 1200,
+        category: 'Gadgets',
+        condition: 'good',
+        description: 'Used for 2 years, works perfectly.',
+        campusId: 'NIT Durgapur',
+        images: [],
+        sellerId: { displayName: 'Amit', rating: { avg: 4.7 } },
+        createdAt: new Date(Date.now() - 86400000)
+      },
+      {
+        _id: 'demo2',
+        title: 'CSE Semester 4 Notes',
+        price: 500,
+        category: 'Notes',
+        condition: 'fair',
+        description: 'Handwritten notes for Data Structures & Algorithms.',
+        campusId: 'NIT Durgapur',
+        images: [],
+        sellerId: { displayName: 'Priya', rating: { avg: 4.9 } },
+        createdAt: new Date(Date.now() - 43200000)
+      },
+      {
+        _id: 'demo3',
+        title: 'iPad Air (2020)',
+        price: 22000,
+        category: 'Gadgets',
+        condition: 'like_new',
+        description: 'Bought in 2022, rarely used. Includes charger.',
+        campusId: 'NIT Durgapur',
+        images: [],
+        sellerId: { displayName: 'Rahul', rating: { avg: 4.8 } },
+        createdAt: new Date(Date.now() - 7200000)
+      }
+    ];
+
+    // Initialize the app when the page loads
+    document.addEventListener('DOMContentLoaded', initApp);
+
+    // Set current year in footer
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    window.openProduct = openProduct;
+window.openChat = openChat;
+window.negotiateBot = negotiateBot;
+window.negotiate = negotiate;
+window.send = send;
+window.handleTyping = handleTyping;
+window.rateSeller = rateSeller;
+  </script>
+</body>
+</html>
